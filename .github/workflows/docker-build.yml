@@ -1,54 +1,60 @@
 name: Build and Push SimpleTimeService to ACR
 
-# Trigger the workflow on pushes to the main branch
+# ----------------------------------------------------
+# 1. Triggers
+# ----------------------------------------------------
 on:
+  # Run pipeline on ANY push to the 'main' branch
   push:
     branches:
       - main
-    paths:
-      - 'app/**' # Only run if files in the app folder change
+  
+  # Allow manual triggering from the GitHub UI
+  workflow_dispatch:
 
-# Define environment variables used throughout the workflow
+# ----------------------------------------------------
+# 2. Environment Variables
+# ----------------------------------------------------
 env:
   AZURE_ACR_NAME: particle41
   AZURE_ACR_LOGIN_SERVER: particle41.azurecr.io
-  IMAGE_NAME: simple-timeservice
+  IMAGE_NAME: particle41
   IMAGE_TAG: latest
-  DOCKERFILE_PATH: app/Dockerfile # Path to your Dockerfile
+  DOCKERFILE_PATH: app/Dockerfile
 
+# ----------------------------------------------------
+# 3. Jobs
+# ----------------------------------------------------
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-    # 1. Checkout the source code
+    # 3.1. Checkout the source code
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # 2. Log in to Azure using the Service Principal secret
+    # 3.2. Log in to Azure using the Service Principal secret
     - name: Log in to Azure
       uses: azure/login@v1
       with:
-        # Pass the full JSON secret directly to the 'creds' input
+        # Creds must be the full JSON output from az ad sp create-for-rbac
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # 3. Log in to ACR (Docker Login)
-    # To securely get credentials from the AZURE_CREDENTIALS JSON:
+    # 3.3. Log in to ACR (Docker Login)
     - name: Docker Login to ACR
       uses: docker/login-action@v3
       with:
         registry: ${{ env.AZURE_ACR_LOGIN_SERVER }}
-        # Pass the individual properties of the JSON secret directly as separate secrets
-        # The 'clientId' and 'clientSecret' from your JSON are the ACR username/password.
+        # Extracts clientId/clientSecret from the JSON for Docker authentication
         username: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
         password: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
 
-    # 4. Build and Push the Docker Image
+    # 3.4. Build and Push the Docker Image
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v5
       with:
         push: true
-        # Context should be the path to the folder containing the Dockerfile (the 'app' folder)
-        # Using simple path string is more reliable than complex expression here:
+        # Context is the folder containing the Dockerfile
         context: ./app
         file: ${{ env.DOCKERFILE_PATH }}
         tags: |
