@@ -1,0 +1,52 @@
+name: Build and Push SimpleTimeService to ACR
+
+# Trigger the workflow on pushes to the main branch
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**' # Only run if files in the app folder change
+
+# Define environment variables used throughout the workflow
+env:
+  AZURE_ACR_NAME: particle41
+  AZURE_ACR_LOGIN_SERVER: particle41.azurecr.io
+  IMAGE_NAME: simple-timeservice
+  IMAGE_TAG: latest
+  DOCKERFILE_PATH: app/Dockerfile # Path to your Dockerfile
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    # 1. Checkout the source code
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # 2. Log in to Azure using the Service Principal secret
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        enable-AzPSSession: true # Required for some actions
+
+    # 3. Log in to ACR (Docker Login)
+    - name: Docker Login to ACR
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.AZURE_ACR_LOGIN_SERVER }}
+        # Uses built-in token from Azure login for ACR authentication
+        username: ${{ secrets.AZURE_CREDENTIALS | fromJson | .clientId }}
+        password: ${{ secrets.AZURE_CREDENTIALS | fromJson | .clientSecret }}
+
+    # 4. Build and Push the Docker Image
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        context: ${{ env.DOCKERFILE_PATH | dirname }} # Context is the 'app/' folder
+        file: ${{ env.DOCKERFILE_PATH }}
+        tags: |
+          ${{ env.AZURE_ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          ${{ env.AZURE_ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
