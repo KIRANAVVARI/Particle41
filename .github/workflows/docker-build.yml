@@ -28,24 +28,28 @@ jobs:
     - name: Log in to Azure
       uses: azure/login@v1
       with:
+        # Pass the full JSON secret directly to the 'creds' input
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-        enable-AzPSSession: true # Required for some actions
 
     # 3. Log in to ACR (Docker Login)
+    # To securely get credentials from the AZURE_CREDENTIALS JSON:
     - name: Docker Login to ACR
       uses: docker/login-action@v3
       with:
         registry: ${{ env.AZURE_ACR_LOGIN_SERVER }}
-        # Uses built-in token from Azure login for ACR authentication
-        username: ${{ secrets.AZURE_CREDENTIALS | fromJson | .clientId }}
-        password: ${{ secrets.AZURE_CREDENTIALS | fromJson | .clientSecret }}
+        # Pass the individual properties of the JSON secret directly as separate secrets
+        # The 'clientId' and 'clientSecret' from your JSON are the ACR username/password.
+        username: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
+        password: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
 
     # 4. Build and Push the Docker Image
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v5
       with:
         push: true
-        context: ${{ env.DOCKERFILE_PATH | dirname }} # Context is the 'app/' folder
+        # Context should be the path to the folder containing the Dockerfile (the 'app' folder)
+        # Using simple path string is more reliable than complex expression here:
+        context: ./app
         file: ${{ env.DOCKERFILE_PATH }}
         tags: |
           ${{ env.AZURE_ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
