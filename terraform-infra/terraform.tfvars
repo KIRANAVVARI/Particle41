@@ -1,0 +1,17 @@
+acr_login_server             = "particle41.azurecr.io"
+image_name                   = "particle41:latest"
+rg_name_infra                = "rg-particle41"
+vnet_name                    = "vnet-particle41"
+private1_subnet_name = "snet-containerapps"
+private2_subnet_name = "snet-private2"
+public1_subnet_name = "snet-appgw"
+public2_subnet_name = "snet-public2"
+vnet_address_space           = ["10.0.0.0/16"]
+private1_subnet_address_space= ["10.0.2.0/23"]
+private2_subnet_address_space= ["10.0.4.0/24"]
+public1_subnet_address_space= ["10.0.10.0/24"]
+public2_subnet_address_space = ["10.0.11.0/24"]
+container_app_environment_name = "cae-particle41"
+container_app_name             = "simple-time-service"
+log_analytics_name             = "law-particle41"
+app_gateway_name               = "agw-particle41"
