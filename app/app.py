@@ -16,7 +16,8 @@ def get_time_and_ip():
     
     response_data = {
         "timestamp": current_time,
-        "ip": visitor_ip
+        "ip": visitor_ip,
+        "TESTING IT" : "TESTING"
     }
     
     return json.dumps(response_data), 200, {'Content-Type': 'application/json'}
