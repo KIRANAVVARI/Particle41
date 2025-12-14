@@ -17,7 +17,8 @@ The infrastructure follows a secure pattern: **Public Load Balancer (App Gateway
 
 ---
 
-## 🛠️ PrerequisitesTo successfully build and deploy this project, the following tools must be installed and configured on your machine:
+## 🛠️ Prerequisites
+To successfully build and deploy this project, the following tools must be installed and configured on your machine:
 
 | Tool | Purpose | Installation Link |
 | --- | --- | --- |
@@ -26,7 +27,8 @@ The infrastructure follows a secure pattern: **Public Load Balancer (App Gateway
 | **Terraform (v1.6+)** | Provision the Azure infrastructure. | [Terraform Installation](https://developer.hashicorp.com/terraform/downloads) |
 | **Azure CLI (AZ)** | Authenticate and manage Azure resources. | [Azure CLI Installation](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) |
 
-### Cloud Credentials Setup (Mandatory)You must authenticate the Azure CLI before running any local Terraform commands:
+### Cloud Credentials Setup (Mandatory)
+You must authenticate the Azure CLI before running any local Terraform commands:
 
 ```bash
 # Log in interactively to your Azure account
@@ -40,9 +42,11 @@ az account set --subscription "<SUBSCRIPTION_ID>"
 
 ---
 
-## ☁️ Task 1: Application and ContainerThe application code is located in the `app/` directory.
+## ☁️ Task 1: Application and Container
+The application code is located in the `app/` directory.
 
-### 1. SimpleTimeService (`app/app.py`)The Flask application is configured to correctly extract the visitor's public IP address (X.X.X.X) when running behind a proxy like the Azure Application Gateway.
+### 1. SimpleTimeService (`app/app.py`)
+The Flask application is configured to correctly extract the visitor's public IP address (X.X.X.X) when running behind a proxy like the Azure Application Gateway.
 
 **Expected JSON Output:**
 
@@ -54,7 +58,8 @@ az account set --subscription "<SUBSCRIPTION_ID>"
 
 ```
 
-### 2. Local Container Build and RunYou can test the application locally using the pre-built image from the public registry.
+### 2. Local Container Build and Run
+You can test the application locally using the pre-built image from the public registry.
 you can test the build image using basic docker commands. Steps to do the same:
 1. Clone the repo to your local system
 2. Cd to app folder
@@ -85,7 +90,8 @@ docker rm simple-time-service
 
 ---
 
-## 🏗️ Task 2 : Infrastructure DeploymentThe infrastructure setup is split into two Terraform root modules for clean separation:
+## 🏗️ Task 2 : Infrastructure Deployment
+The infrastructure setup is split into two Terraform root modules for clean separation:
 
 1. **`terraform-backend/`**: Creates the remote state storage (Extra Credit).
 2. **`terraform-infra/`**: Deploys the application and networking.
