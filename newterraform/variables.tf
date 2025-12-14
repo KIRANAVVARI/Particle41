@@ -1,14 +1,21 @@
 variable "location" {
   description = "Azure region"
-  default     = "West US"
+  type        = string
+  default     = "East US"
 }
 
 variable "acr_login_server" {
   description = "ACR login server"
-  default     = "particle41.azurecr.io"
+  type        = string
 }
 
 variable "image_name" {
-  description = "Container image"
-  default     = "particle41:latest"
+  description = "Container image name with tag"
+  type        = string
+}
+
+variable "container_port" {
+  description = "Port exposed by container"
+  type        = number
+  default     = 8080
 }
