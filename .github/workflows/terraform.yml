@@ -47,21 +47,21 @@ jobs:
       # Initialize Terraform (Note the -chdir argument)
       - name: Terraform Init
         id: init
-        run: terraform init -chdir=${{ env.TF_ROOT }}
+        run: terraform -chdir=${{ env.TF_ROOT }} init
 
       # Validate checks configuration syntax and correctness
       - name: Terraform Validate
         id: validate
-        run: terraform validate -chdir=${{ env.TF_ROOT }}
+        run: terraform -chdir=${{ env.TF_ROOT }} validate 
 
       # PLAN: Runs on every Pull Request to show the changes
       - name: Terraform Plan
         id: plan
-        if: github.event_name == 'pull_request'
-        run: terraform plan -chdir=${{ env.TF_ROOT }} -no-color
+        #if: github.event_name == 'pull_request'
+        run: terraform -chdir=${{ env.TF_ROOT }} plan -no-color
 
       # APPLY: Only runs when code is merged or pushed directly to the 'main' branch
       - name: Terraform Apply
         id: apply
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: terraform apply -chdir=${{ env.TF_ROOT }} -auto-approve
+        #if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: terraform -chdir=${{ env.TF_ROOT }} apply -auto-approve
