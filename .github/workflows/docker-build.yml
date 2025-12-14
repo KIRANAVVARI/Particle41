@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'app/**' 
   
   # Allow manual triggering from the GitHub UI
   workflow_dispatch:

@@ -1,0 +1,67 @@
+# .github/workflows/main.yml
+
+name: 'Terraform Azure Infrastructure'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform-infra/**' 
+      
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'terraform-infra/**'
+  
+  workflow_dispatch:
+
+    
+jobs:
+  terraform:
+    name: 'Terraform Execution'
+    runs-on: ubuntu-latest
+    
+    # Define environment variables for Azure Authentication using the secrets
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      # Important: If your Terraform code is in a subdirectory (terraform-infra), 
+      # you MUST change the working directory for all subsequent commands.
+      - name: Set Terraform Working Directory
+        run: echo "TF_ROOT=./terraform-infra" >> $GITHUB_ENV
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.x 
+
+      # Initialize Terraform (Note the -chdir argument)
+      - name: Terraform Init
+        id: init
+        run: terraform init -chdir=${{ env.TF_ROOT }}
+
+      # Validate checks configuration syntax and correctness
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -chdir=${{ env.TF_ROOT }}
+
+      # PLAN: Runs on every Pull Request to show the changes
+      - name: Terraform Plan
+        id: plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -chdir=${{ env.TF_ROOT }} -no-color
+
+      # APPLY: Only runs when code is merged or pushed directly to the 'main' branch
+      - name: Terraform Apply
+        id: apply
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: terraform apply -chdir=${{ env.TF_ROOT }} -auto-approve
